@@ -5,21 +5,34 @@ from autotest import models
 
 user_list = []
 def index(request):
-    # return HttpResponse(u"欢迎光临 自动化测试平台!")
+    c_user = request.COOKIES.get('c_user')
+    if not c_user:
+        return redirect('/login/')
+    else:
+        return HttpResponse("%s您好！欢迎光临自动化测试平台!"%c_user)
+    # if request.method == 'POST':
+    #     username = request.POST.get('username')
+    #     password = request.POST.get('password')
+    #     print(username,password)
+    #
+    #     # temp = {'user':username,'pwd':password}
+    #     # user_list.append(temp)
+    #
+    #     # 将数据保存到数据库
+    #     models.UserInfo.objects.create(user=username,pwd=password)
+    #
+    # # 从数据库中读取数据
+    # user_list = models.UserInfo.objects.all()
+    # return render(request,'index.html', {'data':user_list})
+
+
+def reg(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        print(username,password)
-
-        # temp = {'user':username,'pwd':password}
-        # user_list.append(temp)
-
-        # 将数据保存到数据库
-        models.UserInfo.objects.create(user=username,pwd=password)
-
-    # 从数据库中读取数据
-    user_list = models.UserInfo.objects.all()
-    return render(request,'index.html', {'data':user_list})
+        c_passwd = request.POST.get('c_passwd')
+        if models.UserInfo.objects.filter(user=username).count() == 0:
+            print('可以注册')
 
 
 def login(request):
