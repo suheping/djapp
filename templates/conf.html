@@ -1,0 +1,27 @@
+{#--------------form表单---------------------#}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+</head>
+<body>
+    <h1>请完整填写以下配置</h1>
+    <form action="/conf/" method="post">
+        {% csrf_token %}
+        rule = <input type="text" required name = "rule"><br />
+        <h2>[test_api]</h2>
+        data_file = <input type="text" required name="api_data" /><br />
+        report_file = <input type="text" required name="api_report" /><br />
+        <h2>[test_process]</h2>
+        data_file = <input type="text" required name="process_data" /><br />
+        report_file = <input type="text" required name="process_report" /><br />
+        <h2>[email]</h2>
+        smtp_host = <input type="text" required name="smtp_host" /><br />
+        from_addr = <input type="email" required name="from_addr" /><br />
+        password = <input type="password" required name="password" /><br />
+        to_addr = <input type="text" required name="to_addr" /><br />
+        <input type="submit" value="提交" />
+    </form>
+</body>
+</html>
