@@ -19,6 +19,15 @@ from autotest import views as at_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('',at_views.index),
     path('index/',at_views.index),
-    path('conf/',at_views.conf),
+    path('login/',at_views.login),
+    path('reg/',at_views.reg),
+    path('uploadConf/',at_views.uploadConf),
+    path('uploadDatafile/',at_views.uploadDatafile),
+    path('runtest/',at_views.runtest),
+    path('logout/',at_views.logout),
+    path('download_conf/',at_views.download_conf),
+    path('download_api',at_views.download_api),
+    path('download_process',at_views.download_process),
 ]

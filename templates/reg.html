@@ -2,19 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>登录</title>
+    <title>注册页面</title>
 </head>
 <body>
-    <h1>尚未登录，请登录：</h1>
-    <form action="" method="POST">
+       <form action="" method="POST">
         {% csrf_token %}
         用户名：<input type="text" name="username" /><br />
         密码：<input type="password" name="password" /><br />
-        <input type="submit" value="登录" name="login"/>
-        <a href="/reg/">注册</a>
+        确认密码：<input type="password" name="c_passwd"><br />
+        <input type="submit" value="注册" />
     </form>
-
-
-
 </body>
 </html>

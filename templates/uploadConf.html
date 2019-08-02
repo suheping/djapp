@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>上传配置文件</title>
+</head>
+<body>
+    <form enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        {% include 'base.html' %}
+        <a href="/download_conf" style="color: blue">下载模板</a><br>
+        <input type="file" name="conf_file" /><br/>
+        <input type="submit" value="上传"/>
+    </form>
+</body>
+</html>

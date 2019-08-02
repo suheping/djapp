@@ -14,3 +14,9 @@ sqlparse==0.3.0
 typing==3.7.4
 urllib3==1.25.3
 wcwidth==0.1.7
+chardet==3.0.4
+ddt==1.2.0
+et-xmlfile==1.0.1
+jdcal==1.4
+openpyxl==2.5.8
+xlrd==1.1.0

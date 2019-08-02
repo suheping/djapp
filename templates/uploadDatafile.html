@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>上传测试用例文件</title>
+</head>
+<body>
+    <form enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        {% include 'base.html' %}
+        <a href="/download_api" style="color: blue">下载单接口测试用例模板</a><br>
+        <a href="/download_process" style="color: blue">下载流程测试用例模板</a><br>
+        <input type="file" name="datafile" /><br/>
+        <input type="submit" value="上传"/>
+    </form>
+</body>
+</html>

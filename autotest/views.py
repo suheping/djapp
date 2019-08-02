@@ -1,29 +1,25 @@
 # coding:utf-8
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+
+import os
+import random
+import time
+from django.contrib.auth.hashers import make_password, check_password
+from django.http import HttpResponse, HttpResponseRedirect, FileResponse
+from django.shortcuts import render
 from autotest import models
+from bin import run
 
 user_list = []
 def index(request):
-    c_user = request.COOKIES.get('c_user')
-    if not c_user:
-        return redirect('/login/')
+    # 获取令牌
+    ticket = request.COOKIES.get('ticket')
+    if not ticket:  # 如果cookie中没有ticket
+        return HttpResponseRedirect('/login/') # 重定向到登录页面
     else:
-        return HttpResponse("%s您好！欢迎光临自动化测试平台!"%c_user)
-    # if request.method == 'POST':
-    #     username = request.POST.get('username')
-    #     password = request.POST.get('password')
-    #     print(username,password)
-    #
-    #     # temp = {'user':username,'pwd':password}
-    #     # user_list.append(temp)
-    #
-    #     # 将数据保存到数据库
-    #     models.UserInfo.objects.create(user=username,pwd=password)
-    #
-    # # 从数据库中读取数据
-    # user_list = models.UserInfo.objects.all()
-    # return render(request,'index.html', {'data':user_list})
+        if models.UserInfo.objects.filter(ticket=ticket).exists():  # 如果有匹配的ticket
+            return render(request,'index.html',{'name': models.UserInfo.objects.filter(ticket=ticket)[0].user})
+        else:   # 如果没有匹配的ticket
+            return HttpResponseRedirect('/login/')
 
 
 def reg(request):
@@ -31,84 +27,170 @@ def reg(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         c_passwd = request.POST.get('c_passwd')
-        if models.UserInfo.objects.filter(user=username).count() == 0:
-            print('可以注册')
+
+        if password != c_passwd:
+            return HttpResponse('密码输入不一致！')
+        else:
+            if models.UserInfo.objects.filter(user=username).count() == 0:
+                models.UserInfo.objects.create(user=username, pwd=make_password(password))
+                return HttpResponseRedirect('/login/')
+            else:
+                return HttpResponse('用户名已存在')
+    else:
+        return render(request,'reg.html')
 
 
 def login(request):
-    if request.method == 'POST':  # 如果为post请求，判断用户名密码是否正确
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        pwd = models.UserInfo.objects.filter(user=username)
-        if password == pwd:  # 如果用户名密码匹配
-            obj = redirect('/index/')   # 跳转index页面
-            obj.set_cookie('c_user',username)   # 将用户名写入cookie中
-            return redirect('/index/')
-        else:   # 如果用户名密码不匹配，加载login.html
-            return render(request,'login.html')
-    else:   # 如果为get请求，判断是否已经登录
-        c_user = request.COOKIES.get('c_user')
-        if not c_user:   # 未登录留在登录页面
-            return render(request, 'login.html')
-        else:   # 已登录进入index
-            return redirect('/index/')
-
-
-
-    user = request.COOKIES.get('username')
-    if not user:
-        return redirect('/login/')
-    else:
-        return redirect('/index/')
-
-
-
-confs=[]
-def conf(request):
-    # 更新配置
-    if request.method == 'POST':
-        rule = request.POST.get('rule')
-        api_data = request.POST.get('api_data')
-        api_report = request.POST.get('api_report')
-        process_data = request.POST.get('process_data')
-        process_report = request.POST.get('process_report')
-        smtp_host = request.POST.get('smtp_host')
-        from_addr = request.POST.get('from_addr')
-        password = request.POST.get('password')
-        to_addr = request.POST.get('to_addr')
-        confs ={'username':'admin',
-                'rule':rule,
-                'api_data':api_data,
-                'api_report':api_report,
-                'process_data':process_data,
-                'process_report':process_report,
-                'smtp_host':smtp_host,
-                'from_addr':from_addr,
-                'password':password,
-                'to_addr':to_addr}
-        # print('匹配的数据条数为：',models.Confs.objects.filter(username=confs.get('username')).count())
-        if models.Confs.objects.filter(username=confs.get('username')).count() == 0:
-            # 如果没有数据，insert
-            models.Confs.objects.create(**confs)
+    if request.method == 'GET':
+        print('截获登录get请求')
+        # 获取令牌
+        ticket = request.COOKIES.get('ticket')
+        if not ticket:  # 如果cookie中没有ticket
+            return render(request,'login.html')  # 重定向到登录页面
         else:
-            # 如果已有数据，更新之
-            models.Confs.objects.filter(username=confs.get('username')).update(**confs)
+            if models.UserInfo.objects.filter(ticket=ticket).exists():  # 如果有匹配的ticket
+                return render(request,'index.html',{'name': models.UserInfo.objects.filter(ticket=ticket)[0].user})
+            else:  # 如果没有匹配的ticket
+                return HttpResponseRedirect('/login/')
+    else:
+        print('截获登录请求')
+        name = request.POST.get('username')
+        password = request.POST.get('password')
+        if models.UserInfo.objects.filter(user=name).exists(): #判断用户名是否存在
+            user = models.UserInfo.objects.get(user=name)
+            if check_password(password,user.pwd):  # 判断密码是否正确
+                ticket =''
+                for i in range(16):
+                    s = 'abcdefghijklmnopqrstuvwxyz'
+                    ticket += random.choice(s)
+                now_time = int(time.time())
+                ticket = 'TK'+ticket+str(now_time)
+                print('ticket: ' + ticket)
+                # 绑定令牌到cookie中
+                response = HttpResponseRedirect('/index/')
+                response.set_cookie('ticket',ticket,max_age= 300)
+                # 将令牌存在服务端
+                user.ticket = ticket
+                user.save()
+                return response
+            else:
+                # return render(request,'login.html',{'password':'用户密码错误'})
+                return HttpResponse('密码错误')
+        else:
+            # return render(request,'login.html',{'name':'用户不存在'})
+            return HttpResponse('用户不存在')
 
-        print('数据总条数为：',models.Confs.objects.count())
-        # res = models.Confs.objects.all()
-        # for i in res:
-        #     print(i.rule)
-    return render(request,'conf.html')
+
+def logout(request):
+    response = HttpResponseRedirect('/login/')
+    response.set_cookie('ticket','',max_age=0)
+    return response
 
 
+def uploadConf(request):
+    if request.method == 'POST':
+        confFile = request.FILES.get("conf_file")
+        if not confFile:
+            return HttpResponse("请选择配置文件后上传")
+        else:
+            # 获取令牌
+            ticket = request.COOKIES.get('ticket')
+            username = models.UserInfo.objects.filter(ticket=ticket)[0].user
+            user_path = os.path.join("conf/" + username + '/')
+            if not os.path.exists(user_path):
+                os.mkdir(user_path)
+            dest = open(os.path.join(user_path, 'config.conf'), 'wb+')
+            for chunk in confFile.chunks():
+                dest.write(chunk)
+            dest.close()
+            return HttpResponse('上传完成')
+    else:
+        # 获取令牌
+        ticket = request.COOKIES.get('ticket')
+        if not ticket:  # 如果cookie中没有ticket
+            return HttpResponseRedirect('/login/')  # 重定向到登录页面
+        else:
+            if models.UserInfo.objects.filter(ticket=ticket).exists():  # 如果有匹配的ticket
+                return render(request, 'uploadConf.html',{'name': models.UserInfo.objects.filter(ticket=ticket)[0].user})
+            else:  # 如果没有匹配的ticket
+                return HttpResponseRedirect('/login/')
 
 
- # models.Confs.objects.create(rule=rule,
-            #                             api_data=api_data,
-            #                             api_report=api_report,
-            #                             process_data=process_data,
-            #                             process_report=process_report,
-            #                             smtp_host=smtp_host,
-            #                             from_addr=from_addr,
-            #                             password=password,
-            #                             to_addr=to_addr)
+def uploadDatafile(request):
+    if request.method == 'POST':
+        dataFile = request.FILES.get("datafile")
+        if not dataFile:
+            return HttpResponse("请选择测试用例文件后上传")
+        else:
+            # 获取令牌
+            ticket = request.COOKIES.get('ticket')
+            username = models.UserInfo.objects.filter(ticket=ticket)[0].user
+            user_path = os.path.join("data/" + username + '/')
+            if not os.path.exists(user_path):
+                os.mkdir(user_path)
+            dest = open(os.path.join(user_path,dataFile.name),'wb+')
+            for chunk in dataFile.chunks():
+                dest.write(chunk)
+            dest.close()
+            return HttpResponse('上传完成')
+    else:
+        # 获取令牌
+        ticket = request.COOKIES.get('ticket')
+        if not ticket:  # 如果cookie中没有ticket
+            return HttpResponseRedirect('/login/')  # 重定向到登录页面
+        else:
+            if models.UserInfo.objects.filter(ticket=ticket).exists():  # 如果有匹配的ticket
+                return render(request,'uploadDatafile.html',{'name': models.UserInfo.objects.filter(ticket=ticket)[0].user})
+            else:  # 如果没有匹配的ticket
+                return HttpResponseRedirect('/login/')
+
+
+def runtest(request):
+    if request.method == 'POST':
+        print('截获post请求')
+        # 获取令牌
+        ticket = request.COOKIES.get('ticket')
+        if not ticket:  # 如果cookie中没有ticket
+            return HttpResponseRedirect('/login/')  # 重定向到登录页面
+        else:
+            if models.UserInfo.objects.filter(ticket=ticket).exists():  # 如果有匹配的ticket
+                username = models.UserInfo.objects.filter(ticket=ticket)[0].user
+                report_file = run.run(username)
+                return render(request, report_file)
+
+            else:  # 如果没有匹配的ticket
+                return HttpResponseRedirect('/login/')
+    else:
+        print('截获get请求')
+        # 获取令牌
+        ticket = request.COOKIES.get('ticket')
+        if not ticket:  # 如果cookie中没有ticket
+            return HttpResponseRedirect('/login/')  # 重定向到登录页面
+        else:
+            if models.UserInfo.objects.filter(ticket=ticket).exists():  # 如果有匹配的ticket
+                return render(request, 'runtest.html',{'name': models.UserInfo.objects.filter(ticket=ticket)[0].user})
+            else:  # 如果没有匹配的ticket
+                return HttpResponseRedirect('/login/')
+
+def download_conf(request):
+    file = open('conf/config.conf','rb')
+    response = FileResponse(file)
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="config.conf"'
+    return response
+
+
+def download_api(request):
+    file = open('data/case_api.xlsx','rb')
+    response = FileResponse(file)
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="case_api.xlsx"'
+    return response
+
+def download_process(request):
+    file = open('data/case_process.xlsx','rb')
+    response = FileResponse(file)
+    response['Content-Type'] = 'application/octet-stream'
+    response['Content-Disposition'] = 'attachment;filename="case_process.xlsx"'
+    return response
+

@@ -3,6 +3,16 @@
 import os
 import sys
 
+c_dir = os.getcwd()
+print('当前路径为：' + c_dir)
+conf_dir = os.path.join(c_dir,'conf')
+print('配置文件的路径为：' + conf_dir)
+data_dir = os.path.join(c_dir,'data')
+print('用例文件的路径为：'+ data_dir)
+reprot_dir = os.path.join(c_dir,'report')
+print('报告文件路径为：'+ reprot_dir)
+case_dir = os.path.join(c_dir,'testcase')
+print('testcase路径为：'+ case_dir)
 
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djapp.settings')

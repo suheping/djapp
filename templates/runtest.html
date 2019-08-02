@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>开始测试</title>
+</head>
+<body>
+{#    <a href="">开始测试</a>#}
+    <form action="" method="post">
+        {% csrf_token %}
+        {% include 'base.html' %}
+        <input type="submit" name="runtest" value="开始测试"><br>
+    </form>
+</body>
+</html>

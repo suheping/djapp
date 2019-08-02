@@ -3,8 +3,9 @@ from django.db import models
 # Create your models here.
 
 class UserInfo(models.Model):
-    user = models.CharField(max_length=32)
+    user = models.CharField(max_length=32,unique=True)
     pwd = models.CharField(max_length=32)
+    ticket = models.CharField(max_length=32,null=True)
 
 class Confs(models.Model):
     username = models.CharField(max_length=20,unique=True,default='admin')
