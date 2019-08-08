@@ -14,6 +14,11 @@ print('报告文件路径为：'+ reprot_dir)
 case_dir = os.path.join(c_dir,'testcase')
 print('testcase路径为：'+ case_dir)
 
+api_datafile = ''
+api_reportfile = ''
+process_datafile = ''
+process_reportfile = ''
+
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'djapp.settings')
     try:

@@ -35,10 +35,40 @@ class loadConf():
             return value
 
 
+    @classmethod
+    def load_conf(cls,username):
+        # 配置文件路径
+        # confPath = os.path.abspath(os.path.join(os.getcwd(), "../conf"))
+        # confPath = manage.conf_dir
+        # print('os.getcwd:' + os.getcwd())
+        # confFile = os.path.join(confPath, username + '\config.conf')
+        # print('配置文件为：' + confFile)
+
+        confPath = os.path.abspath(os.path.join(manage.conf_dir,'../../conf'))
+        confFile = os.path.join(confPath,username+'\config.conf')
+        print('配置文件为：' + confFile)
+
+        cf = configparser.ConfigParser()
+        cf.read(confFile, encoding='utf8')
+
+        print(cf.sections())
+        confs = {}
+        try:
+            for i in cf.sections():
+                items = cf.items(i)
+                for j in items:
+                    print(j)
+        except:
+            print('1111')
+        finally:
+            return confs
+
+
 if __name__ == '__main__':
-    x = loadConf.get_config('test','test_api','report_file')
-    print('x:'+x)
-    y = loadConf.get_config('test','test_process','data_file')
-    print('y：'+ y)
+    # x = loadConf.get_config('test','test_api','report_file')
+    # print('x:'+x)
+    # y = loadConf.get_config('test','test_process','data_file')
+    # print('y：'+ y)
     # path = os.path.join(confPath,x)
     # print(path)
+    loadConf.load_conf('test')

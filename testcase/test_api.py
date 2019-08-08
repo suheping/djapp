@@ -13,16 +13,21 @@ from util import glb
 from util.logUtil import Log
 from util.replace import replace
 from util.regFindString import regFindString
+import manage
 
 # 获取data、report目录
-dataPath = glb.dataPath
-reportPath = glb.reportPath
+# dataPath = glb.dataPath
+# reportPath = glb.reportPath
+#
+# datafile = loadConf.get_config('test','test_api','data_file')
+# reportfile = loadConf.get_config('test','test_api','report_file')
+#
+# dataXls = os.path.join(dataPath,datafile)
+# reportXls = os.path.join(reportPath,reportfile)
 
-datafile = loadConf.get_config('test_api','data_file')
-reportfile = loadConf.get_config('test_api','report_file')
-
-dataXls = os.path.join(dataPath,datafile)
-reportXls = os.path.join(reportPath,reportfile)
+dataXls = manage.api_datafile
+reportXls = manage.api_reportfile
+print('test_api.py中用例文件为：'+ dataXls)
 
 # 读取测试用例
 testData_pre = readXlsUtil(dataXls,'Sheet1').dict_data(0)

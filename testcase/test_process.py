@@ -17,15 +17,19 @@ from util import glb
 from util.regFindString import regFindString
 from util.replace import replace
 from util.logUtil import Log
+import manage
 
 logger = Log("test_process")
 
 # 当获取data目录
-dataPath = glb.dataPath
-reportPath = glb.reportPath
+# dataPath = glb.dataPath
+# reportPath = glb.reportPath
+#
+# dataXls = os.path.join(dataPath,loadConf.get_config('test','test_process','data_file'))
+# reportXls = os.path.join(reportPath,loadConf.get_config('test','test_process','report_file'))
 
-dataXls = os.path.join(dataPath,loadConf.get_config('test_process','data_file'))
-reportXls = os.path.join(reportPath,loadConf.get_config('test_process','report_file'))
+dataXls = manage.process_datafile
+reportXls = manage.process_reportfile
 
 # 读取测试数据
 testData_pre = readXlsUtil2(dataXls).dict_data(0)

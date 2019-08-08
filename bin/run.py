@@ -26,7 +26,7 @@ def run_case(allCase):
     htmlReport= reportPath + r'\report_'+ ctime + '.html'
     fp = open(htmlReport,'wb')
     runner = HTMLTestRunner_api.HTMLTestRunner(stream=fp,
-                                               verbosity=2,
+                                               verbosity=2,     
                                                title='自动化测试报告',
                                                description='用例执行情况')
     runner.run(allCase)

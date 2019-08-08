@@ -8,8 +8,12 @@ from django.http import HttpResponse, HttpResponseRedirect, FileResponse
 from django.shortcuts import render
 from autotest import models
 from bin import run
+from util import loadConf_new
+import manage
+
 
 user_list = []
+
 def index(request):
     # 获取令牌
     ticket = request.COOKIES.get('ticket')
@@ -155,7 +159,25 @@ def runtest(request):
         else:
             if models.UserInfo.objects.filter(ticket=ticket).exists():  # 如果有匹配的ticket
                 username = models.UserInfo.objects.filter(ticket=ticket)[0].user
-                report_file = run.run(username)
+                # 定位到配置文件
+                confFile = os.path.join(manage.conf_dir, username + '//config.conf')
+                # 读取配置文件
+                cf = loadConf_new.LoadConfNew()
+                cf.read(confFile ,encoding='utf8')
+                cfgs = cf.as_dict()
+                api_dataname=cfgs['test_api']['data_file']
+                api_reportname = cfgs['test_api']['report_file']
+                process_dataname = cfgs['test_process']['data_file']
+                process_reportname = cfgs['test_process']['report_file']
+                rule = cfgs['run']['rule']
+                # 拼接用例、报告文件
+                manage.api_datafile = os.path.join(manage.data_dir, username+ '//'+ api_dataname)
+                manage.api_reportfile = os.path.join(manage.data_dir, username+ '//'+ api_reportname)
+                manage.process_datafile = os.path.join(manage.data_dir, username+ '//'+ process_dataname)
+                manage.process_reportfile = os.path.join(manage.data_dir, username+ '//'+ process_reportname)
+                # 调用后端测试
+                cases = run.add_case(manage.case_dir,rule)
+                report_file = run.run_case(cases)
                 return render(request, report_file)
 
             else:  # 如果没有匹配的ticket
