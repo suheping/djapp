@@ -3,7 +3,7 @@ certifi==2018.8.24
 chardet==3.0.4
 ddt==1.2.0
 diff==0.4.1
-Django==1.11.6
+Django==1.11.28
 et-xmlfile==1.0.1
 idna==2.7
 jdcal==1.4
