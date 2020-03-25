@@ -16,6 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from autotest import views as at_views
+# 导入辅助函数get_schema_view
+from rest_framework.schemas import get_schema_view
+# 导入两个类
+from rest_framework_swagger.renderers import SwaggerUIRenderer,OpenAPIRenderer
+
+# 利用辅助函数引入所导入的两个类
+schema_view = get_schema_view(title='API',renderer_classes=[SwaggerUIRenderer,OpenAPIRenderer])
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,4 +37,6 @@ urlpatterns = [
     path('download_conf/',at_views.download_conf),
     path('download_api',at_views.download_api),
     path('download_process',at_views.download_process),
+    path('testapi/',at_views.testapi),
+    path('docs/',schema_view),   # 配置docs的url路径
 ]

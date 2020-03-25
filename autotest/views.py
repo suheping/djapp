@@ -10,7 +10,8 @@ from autotest import models
 from bin import run
 from util import loadConf_new
 import manage
-
+import json
+from django.views.decorators.csrf import csrf_exempt
 
 user_list = []
 
@@ -45,11 +46,17 @@ def reg(request):
 
 
 def login(request):
+    '''
+
+    :param request:
+    :return:
+    '''
     if request.method == 'GET':
         print('截获登录get请求')
         # 获取令牌
         ticket = request.COOKIES.get('ticket')
         if not ticket:  # 如果cookie中没有ticket
+            time.sleep(5)
             return render(request,'login.html')  # 重定向到登录页面
         else:
             if models.UserInfo.objects.filter(ticket=ticket).exists():  # 如果有匹配的ticket
@@ -216,3 +223,8 @@ def download_process(request):
     response['Content-Disposition'] = 'attachment;filename="case_process.xlsx"'
     return response
 
+@csrf_exempt
+def testapi(request):
+    resp = {'code':10000,'msg':'success','data':{}}
+    time.sleep(5)
+    return HttpResponse(json.dumps(resp),content_type='application/json')
